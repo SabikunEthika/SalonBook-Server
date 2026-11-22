@@ -4,10 +4,12 @@ import {
   connectDatabase,
   disconnectDatabase,
 } from "./config/database.js";
+import { connectAuthDatabase, disconnectAuthDatabase } from "./lib/auth.js";
 
 const startServer = async (): Promise<void> => {
   try {
     await connectDatabase();
+    await connectAuthDatabase();
 
     const server = app.listen(env.PORT, () => {
       console.log("-----------------------------------");
@@ -30,6 +32,7 @@ const startServer = async (): Promise<void> => {
 
         try {
           await disconnectDatabase();
+          await disconnectAuthDatabase();
         } catch (databaseError) {
           console.error("Error disconnecting database:", databaseError);
           process.exitCode = 1;

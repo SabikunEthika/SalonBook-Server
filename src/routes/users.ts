@@ -1,0 +1,11 @@
+import { Router } from "express";
+import { z } from "zod";
+import { requireAuth, requireRole } from "../middleware/auth.js";
+import { User } from "../models/User.js";
+import { ApiError } from "../utils/ApiError.js";
+const router = Router();
+router.get("/me", requireAuth, async (req, res, next) => { try { const user = await User.findById(req.auth!.userId).select("name email image phone role isBlocked").lean(); if (!user) throw new ApiError(404, "User not found."); res.json({ success: true, data: user }); } catch (error) { next(error); } });
+router.patch("/me", requireAuth, async (req, res, next) => { try { const input = z.object({ name: z.string().trim().min(2).max(80).optional(), image: z.string().url().optional(), phone: z.string().trim().max(30).optional() }).parse(req.body); const user = await User.findByIdAndUpdate(req.auth!.userId, input, { new: true }).select("name email image phone role"); if (!user) throw new ApiError(404, "User not found."); res.json({ success: true, data: user }); } catch (error) { next(error); } });
+router.get("/", requireAuth, requireRole("admin"), async (_req, res, next) => { try { const users = await User.find({ role: "customer" }).select("name email image phone isBlocked createdAt").sort({ createdAt: -1 }).lean(); res.json({ success: true, data: users }); } catch (error) { next(error); } });
+router.patch("/:id/block", requireAuth, requireRole("admin"), async (req, res, next) => { try { const input = z.object({ isBlocked: z.boolean() }).parse(req.body); const user = await User.findOneAndUpdate({ _id: req.params.id, role: "customer" }, input, { new: true }); if (!user) throw new ApiError(404, "Customer not found."); res.json({ success: true, data: user }); } catch (error) { next(error); } });
+export { router as userRouter };

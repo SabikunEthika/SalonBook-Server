@@ -8,6 +8,9 @@ import {
   errorHandler,
   notFoundHandler,
 } from "./middleware/errorHandler.js";
+import { serviceRouter } from "./routes/services.js";
+import { appointmentRouter } from "./routes/appointments.js";
+import { userRouter } from "./routes/users.js";
 
 const app = express();
 
@@ -52,6 +55,10 @@ app.get("/api/health", (_req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+app.use("/api/services", serviceRouter);
+app.use("/api/appointments", appointmentRouter);
+app.use("/api/users", userRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

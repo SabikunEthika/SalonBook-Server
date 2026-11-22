@@ -7,6 +7,7 @@ import type {
 
 import { ApiError } from "../utils/ApiError.js";
 import { env } from "../config/env.js";
+import { ZodError } from "zod";
 
 export const notFoundHandler = (
   req: Request,
@@ -33,6 +34,11 @@ export const errorHandler: ErrorRequestHandler = (
   if (error instanceof ApiError) {
     statusCode = error.statusCode;
     message = error.message;
+  }
+
+  if (error instanceof ZodError) {
+    statusCode = 400;
+    message = error.issues[0]?.message ?? "Invalid request data.";
   }
 
   if (env.NODE_ENV !== "production") {

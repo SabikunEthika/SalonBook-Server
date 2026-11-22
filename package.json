@@ -1,0 +1,48 @@
+{
+  "name": "salonbook-server",
+  "version": "1.0.0",
+  "description": "Backend API for SalonBook, a salon appointment booking platform.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SabikunEthika/SalonBook-Server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SabikunEthika/SalonBook-Server/issues"
+  },
+  "homepage": "https://github.com/SabikunEthika/SalonBook-Server#readme",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@better-auth/mongo-adapter": "^1.7.27",
+    "better-auth": "^1.7.27",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.5",
+    "helmet": "^8.3.0",
+    "jose": "^6.2.18",
+    "mongodb": "^7.9.1",
+    "mongoose": "^9.12.3",
+    "multer": "^2.5.0",
+    "stripe": "^23.2.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

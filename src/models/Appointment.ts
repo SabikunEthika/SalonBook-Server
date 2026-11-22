@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const appointmentSchema = new mongoose.Schema(
   {
     serviceId: { type: mongoose.Schema.Types.ObjectId, ref: "Service", required: true },
-    customerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    customerId: { type: String, required: true, index: true },
     appointmentDate: { type: String, required: true },
     timeSlot: { type: String, required: true },
     message: { type: String, trim: true, maxlength: 500, default: "" },

@@ -11,6 +11,7 @@ import {
 import { serviceRouter } from "./routes/services.js";
 import { appointmentRouter } from "./routes/appointments.js";
 import { userRouter } from "./routes/users.js";
+import { auth } from "./lib/auth.js";
 
 const app = express();
 
@@ -40,9 +41,29 @@ const apiLimiter = rateLimit({
 
 app.use("/api", apiLimiter);
 
-// Important:
-// Better Auth and Stripe webhook routes will be mounted
-// before JSON parsing when we integrate them.
+app.use("/api/auth", express.json({ limit: "1mb" }), async (req, res, next) => {
+  try {
+    const headers = new Headers();
+    Object.entries(req.headers).forEach(([key, value]) => {
+      if (typeof value === "string") headers.set(key, value);
+      if (Array.isArray(value)) headers.set(key, value.join(", "));
+    });
+    const request = new Request(`${env.BETTER_AUTH_URL}${req.originalUrl}`, {
+      method: req.method,
+      headers,
+      body: ["GET", "HEAD"].includes(req.method) ? undefined : JSON.stringify(req.body),
+    });
+    const response = await auth.handler(request);
+    response.headers.forEach((value, key) => {
+      if (key !== "set-cookie") res.setHeader(key, value);
+    });
+    const cookies = response.headers.getSetCookie();
+    if (cookies.length) res.setHeader("set-cookie", cookies);
+    res.status(response.status).send(Buffer.from(await response.arrayBuffer()));
+  } catch (error) {
+    next(error);
+  }
+});
 
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));

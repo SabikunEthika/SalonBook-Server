@@ -1,6 +1,6 @@
-import { Schema, model, models } from "mongoose";
+import mongoose from "mongoose";
 
-const serviceSchema = new Schema(
+const serviceSchema = new mongoose.Schema(
   {
     serviceName: { type: String, required: true, trim: true, maxlength: 100 },
     category: { type: String, required: true, trim: true, maxlength: 60 },
@@ -15,4 +15,4 @@ const serviceSchema = new Schema(
 
 serviceSchema.index({ serviceName: "text", category: "text" });
 
-export const Service = models.Service || model("Service", serviceSchema);
+export const Service = mongoose.models.Service || mongoose.model("Service", serviceSchema);

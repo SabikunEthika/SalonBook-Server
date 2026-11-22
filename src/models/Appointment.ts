@@ -1,9 +1,9 @@
-import { Schema, model, models } from "mongoose";
+import mongoose from "mongoose";
 
-const appointmentSchema = new Schema(
+const appointmentSchema = new mongoose.Schema(
   {
-    serviceId: { type: Schema.Types.ObjectId, ref: "Service", required: true },
-    customerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    serviceId: { type: mongoose.Schema.Types.ObjectId, ref: "Service", required: true },
+    customerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     appointmentDate: { type: String, required: true },
     timeSlot: { type: String, required: true },
     message: { type: String, trim: true, maxlength: 500, default: "" },
@@ -17,4 +17,4 @@ const appointmentSchema = new Schema(
 appointmentSchema.index({ serviceId: 1, appointmentDate: 1, timeSlot: 1, status: 1 });
 appointmentSchema.index({ customerId: 1, createdAt: -1 });
 
-export const Appointment = models.Appointment || model("Appointment", appointmentSchema);
+export const Appointment = mongoose.models.Appointment || mongoose.model("Appointment", appointmentSchema);

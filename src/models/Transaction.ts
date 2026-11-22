@@ -1,9 +1,9 @@
-import { Schema, model, models } from "mongoose";
+import mongoose from "mongoose";
 
-const transactionSchema = new Schema(
+const transactionSchema = new mongoose.Schema(
   {
-    appointmentId: { type: Schema.Types.ObjectId, ref: "Appointment", required: true, unique: true },
-    customerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    appointmentId: { type: mongoose.Schema.Types.ObjectId, ref: "Appointment", required: true, unique: true },
+    customerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     amount: { type: Number, required: true, min: 0 },
     currency: { type: String, required: true, lowercase: true },
     stripeSessionId: { type: String, required: true, unique: true },
@@ -12,4 +12,4 @@ const transactionSchema = new Schema(
   { timestamps: true }
 );
 
-export const Transaction = models.Transaction || model("Transaction", transactionSchema);
+export const Transaction = mongoose.models.Transaction || mongoose.model("Transaction", transactionSchema);

@@ -11,6 +11,7 @@ import {
 import { serviceRouter } from "./routes/services.js";
 import { appointmentRouter } from "./routes/appointments.js";
 import { userRouter } from "./routes/users.js";
+import { uploadRouter } from "./routes/uploads.js";
 import { auth } from "./lib/auth.js";
 
 const app = express();
@@ -80,6 +81,7 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/services", serviceRouter);
 app.use("/api/appointments", appointmentRouter);
 app.use("/api/users", userRouter);
+app.use("/api/uploads", uploadRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

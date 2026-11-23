@@ -14,6 +14,7 @@ import { userRouter } from "./routes/users.js";
 import { uploadRouter } from "./routes/uploads.js";
 import { paymentRouter, stripeWebhook } from "./routes/payments.js";
 import { dashboardRouter } from "./routes/dashboard.js";
+import { transactionRouter } from "./routes/transactions.js";
 import { auth } from "./lib/auth.js";
 
 const app = express();
@@ -88,6 +89,7 @@ app.use("/api/users", userRouter);
 app.use("/api/uploads", uploadRouter);
 app.use("/api/payments", paymentRouter);
 app.use("/api/dashboard", dashboardRouter);
+app.use("/api/transactions", transactionRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

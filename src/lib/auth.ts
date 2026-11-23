@@ -26,6 +26,11 @@ export const auth = betterAuth({
   trustedOrigins: [env.CLIENT_URL],
   database: mongodbAdapter(authDatabase, { client: authClient }),
   emailAndPassword: { enabled: true, minPasswordLength: 6 },
+  ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? {
+    socialProviders: {
+      google: { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET },
+    },
+  } : {}),
   user: {
     additionalFields: {
       role: { type: "string", required: true, defaultValue: "customer", input: false },

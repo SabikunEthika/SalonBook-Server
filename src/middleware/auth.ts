@@ -5,6 +5,10 @@ import { auth } from "../lib/auth.js";
 import { env } from "../config/env.js";
 import { ApiError } from "../utils/ApiError.js";
 
+export type AuthContext = { userId: string; role: "admin" | "customer" };
+export type AuthenticatedRequest = Request & { auth: AuthContext };
+export const getAuth = (req: Request): AuthContext => (req as AuthenticatedRequest).auth;
+
 export const requireAuth = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
   try {
     const authorization = req.headers.authorization;
@@ -15,7 +19,7 @@ export const requireAuth = async (req: Request, _res: Response, next: NextFuncti
       const userId = typeof payload.userId === "string" ? payload.userId : payload.sub;
       const role = payload.role === "admin" || payload.role === "customer" ? payload.role : undefined;
       if (!userId || !role || payload.isBlocked === true) throw new ApiError(403, "Your account cannot access protected features.");
-      req.auth = { ...payload, userId, role };
+      (req as AuthenticatedRequest).auth = { userId, role };
       next();
       return;
     }
@@ -24,7 +28,7 @@ export const requireAuth = async (req: Request, _res: Response, next: NextFuncti
     if (!session) throw new ApiError(401, "Authentication is required.");
     const role = session.user.role;
     if ((role !== "admin" && role !== "customer") || session.user.isBlocked) throw new ApiError(403, "Your account cannot access protected features.");
-    req.auth = { userId: session.user.id, role };
+    (req as AuthenticatedRequest).auth = { userId: session.user.id, role };
     next();
   } catch (error) {
     next(error instanceof ApiError ? error : new ApiError(401, "Invalid or expired authentication token."));
@@ -36,6 +40,7 @@ export const requireRole = (...roles: Array<"admin" | "customer">) => (
   _res: Response,
   next: NextFunction
 ): void => {
-  if (!req.auth || !roles.includes(req.auth.role)) return next(new ApiError(403, "You do not have permission for this action."));
+  const authContext = (req as Request & { auth?: AuthContext }).auth;
+  if (!authContext || !roles.includes(authContext.role)) return next(new ApiError(403, "You do not have permission for this action."));
   next();
 };

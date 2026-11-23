@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
-    "seed:services": "tsx src/scripts/seedServices.ts"
+    "seed:services": "tsx src/scripts/seedServices.ts",
+    "seed:admin": "tsx src/scripts/seedAdmin.ts"
   },
   "repository": {
     "type": "git",

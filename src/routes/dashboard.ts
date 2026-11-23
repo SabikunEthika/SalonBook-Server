@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { requireAuth } from "../middleware/auth.js";
+import { getAuth, requireAuth } from "../middleware/auth.js";
 import { Appointment } from "../models/Appointment.js";
 import { Service } from "../models/Service.js";
 import { Transaction } from "../models/Transaction.js";
@@ -9,7 +9,7 @@ const router = Router();
 
 router.get("/stats", requireAuth, async (req, res, next) => {
   try {
-    if (req.auth!.role === "admin") {
+    if (getAuth(req).role === "admin") {
       const [customers, activeServices, appointments, pendingAppointments, confirmedAppointments, successfulPayments, paymentTotal] = await Promise.all([
         User.countDocuments({ role: "customer" }),
         Service.countDocuments({ status: "active" }),
@@ -21,7 +21,7 @@ router.get("/stats", requireAuth, async (req, res, next) => {
       ]);
       return res.json({ success: true, data: { role: "admin", customers, activeServices, appointments, pendingAppointments, confirmedAppointments, successfulPayments, paymentTotal: paymentTotal[0]?.total ?? 0 } });
     }
-    const customerId = req.auth!.userId;
+    const customerId = getAuth(req).userId;
     const [appointments, pendingAppointments, confirmedAppointments, cancelledAppointments, paidAppointments] = await Promise.all([
       Appointment.countDocuments({ customerId }),
       Appointment.countDocuments({ customerId, status: "pending" }),

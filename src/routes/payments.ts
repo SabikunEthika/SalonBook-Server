@@ -1,7 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from "express";
 import Stripe from "stripe";
 import { env } from "../config/env.js";
-import { requireAuth, requireRole } from "../middleware/auth.js";
+import { getAuth, requireAuth, requireRole } from "../middleware/auth.js";
 import { Appointment } from "../models/Appointment.js";
 import { Transaction } from "../models/Transaction.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -12,10 +12,11 @@ const stripe = env.STRIPE_SECRET_KEY ? new Stripe(env.STRIPE_SECRET_KEY) : null;
 router.post("/checkout/:appointmentId", requireAuth, requireRole("customer"), async (req, res, next) => {
   try {
     if (!stripe) throw new ApiError(503, "Payments are not configured yet.");
-    const appointment = await Appointment.findOne({ _id: req.params.appointmentId, customerId: req.auth!.userId, status: "confirmed", paymentStatus: "unpaid" }).populate("serviceId", "serviceName").lean();
+    const customerId = getAuth(req).userId;
+    const appointment = await Appointment.findOne({ _id: req.params.appointmentId, customerId, status: "confirmed", paymentStatus: "unpaid" }).populate("serviceId", "serviceName").lean();
     if (!appointment) throw new ApiError(400, "Only your confirmed, unpaid appointments can be paid.");
     const service = appointment.serviceId as unknown as { serviceName?: string } | null;
-    const session = await stripe.checkout.sessions.create({ mode: "payment", client_reference_id: String(appointment._id), metadata: { appointmentId: String(appointment._id), customerId: req.auth!.userId }, line_items: [{ quantity: 1, price_data: { currency: env.STRIPE_CURRENCY, unit_amount: Math.round(appointment.servicePrice * 100), product_data: { name: service?.serviceName ?? "Salon appointment" } } }], success_url: `${env.CLIENT_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`, cancel_url: `${env.CLIENT_URL}/payment/cancel` });
+    const session = await stripe.checkout.sessions.create({ mode: "payment", client_reference_id: String(appointment._id), metadata: { appointmentId: String(appointment._id), customerId }, line_items: [{ quantity: 1, price_data: { currency: env.STRIPE_CURRENCY, unit_amount: Math.round(appointment.servicePrice * 100), product_data: { name: service?.serviceName ?? "Salon appointment" } } }], success_url: `${env.CLIENT_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`, cancel_url: `${env.CLIENT_URL}/payment/cancel` });
     if (!session.url) throw new ApiError(502, "Stripe did not return a checkout URL.");
     res.json({ success: true, data: { url: session.url } });
   } catch (error) { next(error); }

@@ -1,47 +1,43 @@
-# SalonBook - Server
+# SalonBook Server
 
-Backend API for SalonBook, a salon appointment booking platform.
-
-## Overview
-
-SalonBook allows customers to explore salon services, request appointments,
-manage bookings, and make payments through Stripe.
-
-Administrators can manage services, customers, appointments, and transactions.
-
-## Technology Stack
-
-- Node.js
-- Express.js
-- TypeScript
-- MongoDB
-- Mongoose
-- Better Auth
-- JWT
-- Stripe
-- ImgBB
+Express and TypeScript REST API for SalonBook, a role-based salon appointment platform.
 
 ## Features
 
-- Authentication and authorization
-- Role-based access control
-- Salon service management
-- Appointment management
-- Appointment conflict prevention
-- Stripe Checkout and webhook verification
-- Transaction management
-- Image uploading
-- RESTful APIs
+- Better Auth email/password and optional Google OAuth
+- Cookie-session and signed JWT bearer-token verification
+- Admin/customer role authorization and blocked-user enforcement
+- Active service catalogue with search, filtering, sorting, and image uploads
+- Appointment conflict prevention and role-safe appointment management
+- Stripe Checkout with verified webhook-only payment updates
+- Protected dashboard statistics, customer management, and transaction history
 
-## Environment Variables
+## Stack
 
-See `.env.example` for the required environment variable names.
+Node.js, Express 5, TypeScript, MongoDB/Mongoose, Better Auth, jose, Stripe, Zod, ImgBB.
 
-Never commit actual secrets or `.env` files.
+## Local setup
 
-## Installation
+```bash
+npm install
+copy .env.example .env # Windows
+# cp .env.example .env # macOS/Linux
+npm run dev
+```
 
-Installation and execution instructions will be added as development progresses.
+The API runs on `http://localhost:5000` by default. Run `npm run build && npm start` for a production-style check.
+
+## Environment variables
+
+Set these names in the server environment; never commit the values:
+
+`NODE_ENV`, `PORT`, `CLIENT_URL`, `MONGODB_URI`, `MONGODB_DB_NAME`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`, `JWT_SECRET`, `ADMIN_EMAIL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_CURRENCY`, `IMGBB_API_KEY`.
+
+For production, set `CLIENT_URL` to the deployed client URL and `BETTER_AUTH_URL` to the deployed API URL. Add the Google callback URL `${BETTER_AUTH_URL}/api/auth/callback/google`, and create the Stripe webhook endpoint `${BETTER_AUTH_URL}/api/payments/webhook` for `checkout.session.completed`.
+
+## Deployment
+
+Deploy from the server repository (or configure the hosting root directory to `SalonBook-Server`), set the variables above, run `npm install`, and use `npm run build` as the build command and `npm start` as the start command. Confirm `/api/health` returns JSON before connecting the client.
 
 ## Repository
 

@@ -29,7 +29,10 @@ const envSchema = z.object({
   MONGODB_DB_NAME: z.string().default("salonbook"),
 
   BETTER_AUTH_SECRET: z.preprocess(emptyToUndefined, z.string().min(32).optional()),
+  JWT_SECRET: z.preprocess(emptyToUndefined, z.string().min(32).optional()),
   BETTER_AUTH_URL: z.string().url().default("http://localhost:5000"),
+  GOOGLE_CLIENT_ID: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+  GOOGLE_CLIENT_SECRET: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
   STRIPE_SECRET_KEY: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
   STRIPE_WEBHOOK_SECRET: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
   STRIPE_CURRENCY: z.string().default("usd"),

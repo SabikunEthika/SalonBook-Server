@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { Appointment } from "../models/Appointment.js";
 import { Service } from "../models/Service.js";
+import { User } from "../models/User.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { ApiError } from "../utils/ApiError.js";
 
@@ -13,7 +14,13 @@ router.get("/mine", requireAuth, requireRole("customer"), async (req, res, next)
 });
 
 router.get("/", requireAuth, requireRole("admin"), async (_req, res, next) => {
-  try { const appointments = await Appointment.find().populate("serviceId", "serviceName category image").populate("customerId", "name email image").sort({ createdAt: -1 }).lean(); res.json({ success: true, data: appointments }); } catch (error) { next(error); }
+  try {
+    const appointments = await Appointment.find().populate("serviceId", "serviceName category image").sort({ createdAt: -1 }).lean();
+    const customerIds = [...new Set(appointments.map((appointment) => appointment.customerId))];
+    const customers = await User.find({ id: { $in: customerIds } }).select("id name email image").lean();
+    const customersById = new Map(customers.map((customer) => [customer.id, customer]));
+    res.json({ success: true, data: appointments.map((appointment) => ({ ...appointment, customerId: customersById.get(appointment.customerId) ?? null })) });
+  } catch (error) { next(error); }
 });
 
 router.post("/", requireAuth, requireRole("customer"), async (req, res, next) => {

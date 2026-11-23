@@ -33,6 +33,7 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
   STRIPE_WEBHOOK_SECRET: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
   STRIPE_CURRENCY: z.string().default("usd"),
+  IMGBB_API_KEY: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

@@ -11,6 +11,8 @@ import {
 import { serviceRouter } from "./routes/services.js";
 import { appointmentRouter } from "./routes/appointments.js";
 import { userRouter } from "./routes/users.js";
+import { uploadRouter } from "./routes/uploads.js";
+import { paymentRouter, stripeWebhook } from "./routes/payments.js";
 import { auth } from "./lib/auth.js";
 
 const app = express();
@@ -40,6 +42,8 @@ const apiLimiter = rateLimit({
 });
 
 app.use("/api", apiLimiter);
+
+app.post("/api/payments/webhook", express.raw({ type: "application/json" }), stripeWebhook);
 
 app.use("/api/auth", express.json({ limit: "1mb" }), async (req, res, next) => {
   try {
@@ -80,6 +84,8 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/services", serviceRouter);
 app.use("/api/appointments", appointmentRouter);
 app.use("/api/users", userRouter);
+app.use("/api/uploads", uploadRouter);
+app.use("/api/payments", paymentRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

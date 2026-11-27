@@ -24,6 +24,13 @@ export const auth = betterAuth({
   basePath: "/api/auth",
   secret: env.BETTER_AUTH_SECRET,
   trustedOrigins: [env.CLIENT_URL],
+  advanced: {
+    useSecureCookies: env.NODE_ENV === "production",
+    defaultCookieAttributes:
+      env.NODE_ENV === "production"
+        ? { sameSite: "none", secure: true, httpOnly: true }
+        : { sameSite: "lax", httpOnly: true },
+  },
   database: mongodbAdapter(authDatabase, { client: authClient }),
   emailAndPassword: { enabled: true, minPasswordLength: 6 },
   ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? {

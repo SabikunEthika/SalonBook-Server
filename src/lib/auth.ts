@@ -6,18 +6,28 @@ import { env } from "../config/env.js";
 if (!env.MONGODB_URI || !env.BETTER_AUTH_SECRET) {
   throw new Error("MONGODB_URI and BETTER_AUTH_SECRET are required for authentication.");
 }
-
+let authConnectionPromise: Promise<void> | null = null;
 const authClient = new MongoClient(env.MONGODB_URI);
 const authDatabase = authClient.db(env.MONGODB_DB_NAME);
 
 export const connectAuthDatabase = async (): Promise<void> => {
-  await authClient.connect();
+  if (!authConnectionPromise) {
+    authConnectionPromise = authClient
+      .connect()
+      .then(() => undefined)
+      .catch((error) => {
+        authConnectionPromise = null;
+        throw error;
+      });
+  }
+
+  await authConnectionPromise;
 };
 
 export const disconnectAuthDatabase = async (): Promise<void> => {
   await authClient.close();
+  authConnectionPromise = null;
 };
-
 export const auth = betterAuth({
   appName: "SalonBook",
   baseURL: env.BETTER_AUTH_URL,

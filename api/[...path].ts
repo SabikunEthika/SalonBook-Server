@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+﻿import type { Request, Response } from "express";
 import { app } from "../src/app.js";
 import { connectDatabase } from "../src/config/database.js";
 import { connectAuthDatabase } from "../src/lib/auth.js";
@@ -14,15 +14,23 @@ const init = (): Promise<void> => {
         throw error;
       });
   }
+
   return ready;
 };
 
 export default async function handler(req: Request, res: Response) {
   try {
     await init();
-  } catch {
-    res.status(503).json({ success: false, message: "Database is unavailable. Please try again." });
+  } catch (error) {
+    console.error("Database initialization failed:", error);
+
+    res.status(503).json({
+      success: false,
+      message: "Database is unavailable. Please try again.",
+    });
+
     return;
   }
+
   return app(req, res);
 }

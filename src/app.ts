@@ -15,9 +15,27 @@ import { uploadRouter } from "./routes/uploads.js";
 import { paymentRouter, stripeWebhook } from "./routes/payments.js";
 import { dashboardRouter } from "./routes/dashboard.js";
 import { transactionRouter } from "./routes/transactions.js";
-import { auth } from "./lib/auth.js";
+import { auth, connectAuthDatabase } from "./lib/auth.js";
+import { connectDatabase } from "./config/database.js";
 
 const app = express();
+let databaseInitialization: Promise<void> | null = null;
+
+const initializeDatabases = (): Promise<void> => {
+  if (!databaseInitialization) {
+    databaseInitialization = Promise.all([
+      connectDatabase(),
+      connectAuthDatabase(),
+    ])
+      .then(() => undefined)
+      .catch((error) => {
+        databaseInitialization = null;
+        throw error;
+      });
+  }
+
+  return databaseInitialization;
+};
 
 app.disable("x-powered-by");
 app.set("trust proxy", 1);
@@ -45,6 +63,24 @@ const apiLimiter = rateLimit({
 });
 
 app.use("/api", apiLimiter);
+app.use("/api", async (req, res, next) => {
+  // The health endpoint should remain available independently.
+  if (req.path === "/health") {
+    return next();
+  }
+
+  try {
+    await initializeDatabases();
+    next();
+  } catch (error) {
+    console.error("Database initialization failed:", error);
+
+    res.status(503).json({
+      success: false,
+      message: "Database is unavailable. Please try again.",
+    });
+  }
+});
 
 app.post("/api/payments/webhook", express.raw({ type: "application/json" }), stripeWebhook);
 
@@ -96,3 +132,4 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 export { app };
+export default app;
